@@ -23,6 +23,36 @@ app.get('/test', (req, res) => {
   res.json('test ok');
 });
 
+
+// Login user Api
+app.post('/login', async (req, res) => {
+  const {email, password} = req.body;
+  try{
+    const userDoc = await UserModel.findOne({email});
+    res.json('Found');
+
+  } catch(exception){
+    res.json('Not found');
+  }
+});
+
+
+// Register user Api
+// app.post('/login', async (req, res) => {
+//   const {email, password} = req.body;
+
+//   try {
+//     const userDoc = await UserModel.findOne({email});
+//     res.json(userDoc);
+
+//   } catch (exception) {
+//     res.status(422).json(exception);
+//   }
+
+// });
+
+
+// Register user Api
 app.post('/register', async (req, res) => {
   const {name, email, password} = req.body;
 
@@ -39,5 +69,7 @@ app.post('/register', async (req, res) => {
   }
 
 });
+
+
 
 app.listen(4000);
