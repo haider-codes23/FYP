@@ -84,6 +84,11 @@ app.get('/profile', (req, res) => {
   // res.json("USER INFO");
 });
 
+// logOut Api
+app.post('/logout', (req, res) => {
+  res.cookie('token', '').json(true);
+})
+
 
 
 app.listen(4000);

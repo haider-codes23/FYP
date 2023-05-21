@@ -33,7 +33,7 @@ function Header() {
               </svg>
             </button>
           </div>
-          <Link to={user?'/account':'/login'} className='flex items-center border border-gray-300 rounded-full py-2 px-4 gap-2'>
+          <Link to={user ? '/account':'/login'} className='flex items-center border border-gray-300 rounded-full py-2 px-4 gap-2'>
             <img src={HamburgerMenuIcon} className='w-6 h-6' alt="" />
             <div>
               <img src={UserIcon} className='w-6 h-6' alt="" />

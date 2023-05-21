@@ -9,3 +9,7 @@ input[type="text"],input[type='password'],input[type='email'] {
 button.btn-secondary{
   @apply bg-secondary p-2 w-full rounded-2xl;
 }
+
+button.btn-logout {
+  @apply bg-secondary w-3/5 mt-2 rounded-full p-1 text-white;
+}
