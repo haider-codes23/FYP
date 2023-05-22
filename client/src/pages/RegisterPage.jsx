@@ -32,7 +32,7 @@ function RegisterPage() {
           <input type='text' placeholder='Name'onChange={event => setName(event.target.value)} value={name} />
           <input type="email" placeholder="youremail@email.com" value={email} onChange={event => setEmail(event.target.value)} />
           <input type="password" placeholder="password" value={password} onChange={event => {setPassword(event.target.value);console.log(event.target.value)}} />
-          <button className="btn-secondary">Sign Up</button>
+          <button className="btn-secondary text-white rounded-2xl">Sign Up</button>
           <div className='text-center text-gray-600 py-2'>
             Already a member ?
             <Link className='underline text-black' to={'/login'}>Log In</Link>
