@@ -6,6 +6,9 @@ const UserModel = require('./models/users.js');
 const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const imageDownloader = require('image-downloader');
+const multer = require('multer');
+const fileSystem = require('fs');
 require('dotenv').config();
 
 
@@ -16,6 +19,8 @@ const jwtSecret = 'adsfdfdsfsdfsdff';
 app.use(express.json());
 
 app.use(cookieParser());
+
+app.use('/uploads', express.static(__dirname + '/uploads'));
 
 app.use(cors({
   credentials: true,
@@ -87,7 +92,35 @@ app.get('/profile', (req, res) => {
 // logOut Api
 app.post('/logout', (req, res) => {
   res.cookie('token', '').json(true);
-})
+});
+
+//Api for uploading pictures  using link
+app.post('/upload-by-link', async (req, res) => {
+  const {link} = req.body;
+  const newName = 'photo' + Date.now() + '.jpeg';
+  await imageDownloader.image({
+    url: link,
+    dest: __dirname + '/uploads/' + newName,
+  })
+  res.json(newName);
+});
+
+//middleware for uploading pictures
+const photosMiddleware = multer({dest: 'uploads/'});
+
+//Api for uploading pictures from computer
+app.post('/upload', photosMiddleware.array('photos', 100) ,(req, res) => {
+  const uploadedFiles = [];
+  for (let i = 0; i < req.files.length; i++) {
+    const {path, originalname} = req.files[i];
+    const parts = originalname.split('.');
+    const extension = parts[parts.length - 1];
+    const newPath = path + '.' + extension;
+    fileSystem.renameSync(path, newPath);
+    uploadedFiles.push(newPath.replace('uploads', ''));
+  }
+  res.json(uploadedFiles);
+});
 
 
 

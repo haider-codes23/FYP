@@ -1,18 +1,74 @@
 import { Link, useParams } from "react-router-dom";
-import parkingArea from '../assets/parking-area.png';
-import airConditioner from '../assets/air-conditioner.png';
-import privateEntrance from '../assets/leave.png';
-import washer from '../assets/washing-machine.png';
-import kitchen from '../assets/kitchen.png';
-import bathroomAmenities from '../assets/shampoo.png';
-import tv from '../assets/tv.png';
-import pets from '../assets/pets.png';
-import privateSecurity from '../assets/guard.png';
-import roomCleaningService from '../assets/sweeping.png';
-import wifi from '../assets/wifi.png';
+import { useState } from "react";
+import Perks from "../Perks";
+import axios from "axios";
+
 
 function PlacesPage() {
   const {action} = useParams();
+
+  const [title, setTitle] = useState('');
+  const [address, setAddress] = useState('');
+  const [addedPhotos, setAddedPhotos] = useState([]);
+  const [photoLink, setPhotoLink] = useState('');
+  const [descriptions, setDescriptions] = useState('');
+  const [perks, setPerks] = useState([]);
+  const [exrtaInfo, setExtraInfo] = useState('');
+  const [checkIn, setCheckIn] = useState('');
+  const [checkOut, setCheckOut] = useState('');
+  const [maxRoomies, setMaxRoomies] = useState(1);
+
+  function inputHeader(text) {
+    return (
+      <h2 className="text-2xl mt-4">{text}</h2>
+    );
+  }
+
+  function inputDescription(text) {
+    return (
+      <p className="text-gray-500 text-sm">{text}</p>
+    );
+  }
+
+  function preinput(header, description) {
+    return (
+      <div>
+        {inputHeader(header)}
+        {inputDescription(description)}
+      </div>
+    );
+  }
+
+  async function addPhotoByLink(event) {
+    event.preventDefault();
+     const {data:filename} = await axios.post('/upload-by-link', {link: photoLink});
+     setAddedPhotos(previous => {
+      return (
+        [...previous, filename]
+      );
+     });
+    setPhotoLink('');
+
+  }
+
+  function uploadPhoto(event) {
+    const files = event.target.files;
+    const data = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      data.append('photos', files[i]);
+    }
+    axios.post('/upload', data, {
+      headers: {'Content-Type': 'multipart/form-data'}
+    }).then(response => {
+      const {data:filenames} = response;
+      setAddedPhotos(previous => {
+        return (
+          [...previous, ...filenames]
+        );
+       });
+    })
+  }
+
   console.log(action);
 
   return (
@@ -30,105 +86,54 @@ function PlacesPage() {
       {action === 'new' && (
         <div>
           <form>
-            <h2 className="text-2xl mt-4">Title</h2>
-            <p className="text-gray-500 text-sm">Title for your Place should be short and catchy</p>
-            <input type="text" className="enabled:hover:border-indigo-500/75" placeholder="Title, for example My Lovely Abode" />
-            <h2 className="text-2xl mt-4">Address</h2>
-            <p className="text-gray-500 text-sm">Enter complete address with name of the City</p>
-            <input type="text" className="enabled:hover:border-indigo-500/75" placeholder="Address of your Place" />
-            <h2 className="text-2xl mt-4">Photos</h2>
-            <p className="text-gray-500 text-sm">More are better</p>
+            {preinput('Title', 'Title for your Place should be short and catchy')}
+            <input type="text" value={title} onChange={event => setTitle(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="Title, for example Room with work table and balcony" />
+            {preinput('Address', 'Enter complete address with name of the City')}
+            <input type="text" value={address} onChange={event => setAddress(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="Address of your Place" />
+            {preinput('Photos', 'More are better')}
             <div className="flex gap-3">
-              <input type="text" className="enabled:hover:border-indigo-500/75" placeholder="Add using Link....jpg" />
-              <button className="bg-gray-200 px-4 rounded-2xl">Add&nbsp;Photos</button>
+              <input type="text" value={photoLink} onChange={event => setPhotoLink(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="Add using Link....jpg" />
+              <button onClick={addPhotoByLink} className="bg-gray-200 px-4 rounded-2xl">Add&nbsp;Photos</button>
             </div>
-            <div className="mt-2 grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 ">
-              <button className="flex justify-center gap-1 border bg-transparent rounded-2xl p-8 text-2xl text-gray-600">
+            
+            <div className="mt-2 grid gap-1 grid-cols-3 md:grid-cols-4 lg:grid-cols-6 ">
+              {addedPhotos.length > 0 && addedPhotos.map(link => (
+                // eslint-disable-next-line react/jsx-key
+                <div className="h-32 flex">
+                  <img className="rounded-2xl w-full object-cover" src={'http://localhost:4000/uploads/' + link} alt="" />
+                </div>
+              ))}
+              <label className="flex h-32 justify-center items-center gap-1 border bg-transparent cursor-pointer rounded-2xl p-2 text-2xl text-gray-600 mb-5">
+                <input type="file" multiple className="hidden" onChange={uploadPhoto} />
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 Upload
-              </button>
+              </label>
             </div>
-            <h2 className="text-2xl mt-4">Description</h2>
-            <p className="text-gray-500 text-sm">Desciption of the places</p>
-            <textarea className="enabled:hover:border-indigo-500/75" />
-            <h2 className="text-2xl mt-4">Perks</h2>
-            <p className="text-gray-500 text-sm">Select Perks you offers at your Place</p>
+            {preinput('Description', 'Desciption of the places')}
+            <textarea value={descriptions} onChange={event => setDescriptions(event.target.value)} className="enabled:hover:border-indigo-500/75" />
+            {preinput('Perks', 'Select Perks you offers at your Place')}
+
             <div className="mt-2 grid gap-2 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox"  />
-                <img src={wifi} className='w-10 h-10' />
-                <span>Wifi</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={airConditioner} className='w-10 h-10 mt-4' />
-                <span>Air conditioner</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={parkingArea} className='w-12 h-12 mb-2' />
-                <span>Free parking premises</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={privateEntrance} className='w-10 h-10' />
-                <span>Private Entrance</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={washer} className='w-10 h-10' />
-                <span>Washer</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={kitchen} className='w-10 h-10 mb-2' />
-                <span>Kitchen</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={bathroomAmenities} className='w-10 h-10' />
-                <span>Bathroom amenites </span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={tv} className='w-10 h-10' />
-                <span>TV</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={pets} className='w-10 h-10' />
-                <span>Pets Allowed</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={privateSecurity} className='w-10 h-10' />
-                <span>Private Secuity</span>
-              </label>
-              <label className="border hover:border-indigo-500/75 p-4 gap-2 flex rounded-2xl items-center cursor-pointer">
-                <input type="checkbox" />
-                <img src={roomCleaningService} className='w-12 h-12' />
-                <span>Room Cleaning service</span>
-              </label>
+              <Perks selected={perks} onChange={setPerks} />
             </div>
-            <h2 className="text-2xl mt-4">Extra Info</h2>
-            <p className="text-gray-500 text-sm">House Rules</p>
-            <textarea className="enabled:hover:border-indigo-500/75"></textarea>
-            <h2 className="text-2xl mt-4">Check in & Check out times And Max Roomies</h2>
-            <p className="text-gray-500 text-sm">Add Check in & Check out and Number of Roomies</p>
+
+            {preinput('Extra Info', 'House Rules')}
+            <textarea value={exrtaInfo} onChange={event => event.target.value(setExtraInfo)} className="enabled:hover:border-indigo-500/75"></textarea>
+            {preinput('Check in, Check out time And Max Roomies', 'Add Check in & Check out and Number of Roomies')}
             <div className="grid gap-2 sm:grid-cols-3 ">
               <div>
                 <h3 className="mt-2 -mb-1">Check in Time</h3>
-                <input type="text" className="enabled:hover:border-indigo-500/75" placeholder="14:00" />
+                <input type="text" value={checkIn} onChange={event => setCheckIn(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="14:00" />
               </div>
               <div>
                 <h3 className="mt-2 -mb-1">Check out Time</h3>
-                <input type="text" className="enabled:hover:border-indigo-500/75" placeholder="19:00" />
+                <input type="text" value={checkOut} onChange={event => setCheckOut(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="19:00" />
               </div>
               <div>
                 <h3 className="mt-2 -mb-1">Max number of Roomies</h3>
-                <input type="text" className="enabled:hover:border-indigo-500/75" placeholder="2" />
+                <input type="number" value={maxRoomies} onChange={event => setMaxRoomies(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="2" />
               </div>
               
             </div>
