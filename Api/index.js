@@ -3,6 +3,7 @@ const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
 const UserModel = require('./models/users.js');
+const PlacesModel = require('./models/places.js')
 const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -77,11 +78,12 @@ app.post('/register', async (req, res) => {
 app.get('/profile', (req, res) => {
   const {token} = req.cookies;
   if (token) {
-    jsonWebToken.verify(token, jwtSecret, {}, (error, user) => {
-      res.json(user);
+    jsonWebToken.verify(token, jwtSecret, {}, async (error, userData) => {
+      if (error) throw error;
+      const {name, email, _id} = await UserModel.findById(userData.id);
+
+      res.json({name, email, _id});
     });
-  // console.log(decoded)
-  // res.json(decoded)
 
   } else {
     res.json(null);
@@ -121,6 +123,32 @@ app.post('/upload', photosMiddleware.array('photos', 100) ,(req, res) => {
   }
   res.json(uploadedFiles);
 });
+
+//Api endpoint for Submiting Form Data
+app.post('/places', (req, res) => {
+  const {token} = req.cookies;
+  const {title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies} = req.body;
+  jsonWebToken.verify(token, jwtSecret, {}, async (error, userData) => {
+    if (error) throw error;
+    const placeDoc = await PlacesModel.create({
+      owner: userData.id,
+      title,
+      address,
+      addedPhotos,
+      description,
+      perks,
+      extraInfo,
+      checkIn,
+      checkOut,
+      maxRoomies
+
+    })
+    res.json(placeDoc);
+
+    
+  });
+})
+
 
 
 
