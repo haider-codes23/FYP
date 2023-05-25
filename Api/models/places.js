@@ -11,7 +11,8 @@ const placeSchema = new Schema({
   'extraInfo': String,
   'checkIn': Number,
   'checkOut': Number,
-  'maxRoomies': Number
+  'maxRoomies': Number,
+  'price': Number,
 
 });
 

@@ -127,7 +127,7 @@ app.post('/upload', photosMiddleware.array('photos', 100) ,(req, res) => {
 //Api endpoint for Submiting Form Data
 app.post('/places', (req, res) => {
   const {token} = req.cookies;
-  const {title, address, photos:addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies} = req.body;
+  const {title, address, photos:addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies, price} = req.body;
   jsonWebToken.verify(token, jwtSecret, {}, async (error, userData) => {
     if (error) throw error;
     const placeDoc = await PlacesModel.create({
@@ -140,7 +140,8 @@ app.post('/places', (req, res) => {
       extraInfo,
       checkIn,
       checkOut,
-      maxRoomies
+      maxRoomies,
+      price
 
     })
     res.json(placeDoc);
@@ -168,11 +169,11 @@ app.get('/places/:id',async (req, res) => {
 //Api for updating place 
 app.put('/places', async (req, res) => {
   const {token} = req.cookies;
-  const {id, title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies} = req.body;
+  const {id, title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies, price} = req.body;
   jsonWebToken.verify(token, jwtSecret, {}, async (err, userData) => {
     const placeDoc = await PlacesModel.findById(id);
     if (userData.id === placeDoc.owner.toString()) {
-      placeDoc.set({title, address, photos:addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies});
+      placeDoc.set({title, address, photos:addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies, price});
       await placeDoc.save();
       res.json('ok');
    }

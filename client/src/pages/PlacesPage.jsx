@@ -26,7 +26,7 @@ function PlacesPage() {
         </Link>
         
       </div>
-      <div className="mt-4">
+      <div className="mt-8 grid gap-x-6 gap-y-5">
         {places.length > 0 && places.map(place => (
           // eslint-disable-next-line react/jsx-key
           <Link to={'/account/places/' + place._id} className="bg-indigo-50 shadow-md cursor-pointer gap-4 flex rounded-2xl p-4">

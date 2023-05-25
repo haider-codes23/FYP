@@ -16,6 +16,7 @@ export default function PlacesFormPage() {
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [maxRoomies, setMaxRoomies] = useState(1);
+  const [price, setPrice] = useState(100);
   const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function PlacesFormPage() {
       setCheckIn(data.checkIn);
       setCheckOut(data.checkOut);
       setMaxRoomies(data.maxRoomies);
+      setPrice(data.price);
       
     })
     
@@ -61,7 +63,7 @@ export default function PlacesFormPage() {
 
   async function savePlace(event) {
     event.preventDefault();
-    const placeData = {title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies};
+    const placeData = {title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies, price};
 
     if (id) {
       //update
@@ -101,7 +103,7 @@ export default function PlacesFormPage() {
         {preinput('Extra Info', 'House Rules')}
         <textarea value={extraInfo} onChange={event => setExtraInfo(event.target.value)} className="enabled:hover:border-indigo-500/75"></textarea>
         {preinput('Check in, Check out time And Max Roomies', 'Add Check in & Check out and Number of Roomies')}
-        <div className="grid gap-2 sm:grid-cols-3 ">
+        <div className="grid gap-2 grid-cols-2 md:grid-cols-4 ">
           <div>
             <h3 className="mt-2 -mb-1">Check in Time</h3>
             <input type="text" value={checkIn} onChange={event => setCheckIn(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="14:00" />
@@ -113,6 +115,10 @@ export default function PlacesFormPage() {
           <div>
             <h3 className="mt-2 -mb-1">Max number of Roomies</h3>
             <input type="number" value={maxRoomies} onChange={event => setMaxRoomies(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="2" />
+          </div>
+          <div>
+            <h3 className="mt-2 -mb-1">Price per Hour</h3>
+            <input type="number" value={price} onChange={event => setPrice(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="2" />
           </div>
           
         </div>
