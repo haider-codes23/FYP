@@ -1,11 +1,12 @@
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PhotosUploader from "../PhotosUploader.jsx";
 import Perks from "../Perks";
 import AccountNavigation from "../AccountNavigation.jsx";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 
 export default function PlacesFormPage() {
+  const {id} = useParams();
   const [title, setTitle] = useState('');
   const [address, setAddress] = useState('');
   const [addedPhotos, setAddedPhotos] = useState([]);
@@ -16,6 +17,26 @@ export default function PlacesFormPage() {
   const [checkOut, setCheckOut] = useState('');
   const [maxRoomies, setMaxRoomies] = useState(1);
   const [redirect, setRedirect] = useState(false);
+
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+    axios.get('/places/' + id).then(response => {
+      const {data} = response;
+      setTitle(data.title);
+      setAddress(data.address);
+      setAddedPhotos(data.photos);
+      setDescription(data.description);
+      setPerks(data.perks);
+      setExtraInfo(data.extraInfo);
+      setCheckIn(data.checkIn);
+      setCheckOut(data.checkOut);
+      setMaxRoomies(data.maxRoomies);
+      
+    })
+    
+  }, [id])
 
   function inputHeader(text) {
     return (
@@ -38,10 +59,19 @@ export default function PlacesFormPage() {
     );
   }
 
-  async function addNewPlace(event) {
+  async function savePlace(event) {
     event.preventDefault();
-    await axios.post('/places', {title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies});
-    setRedirect(true);
+    const placeData = {title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies};
+
+    if (id) {
+      //update
+      await axios.put('/places', {id, ...placeData});
+      setRedirect(true);
+    } else {
+      // new place
+      await axios.post('/places', placeData);
+      setRedirect(true);
+    }
   }
 
   if (redirect) {
@@ -51,7 +81,7 @@ export default function PlacesFormPage() {
   return (
     <div>
       <AccountNavigation />
-      <form onSubmit={addNewPlace}>
+      <form onSubmit={savePlace}>
         {preinput('Title', 'Title for your Place should be short and catchy')}
         <input type="text" value={title} onChange={event => setTitle(event.target.value)} className="enabled:hover:border-indigo-500/75" placeholder="Title, for example Room with work table and balcony" />
         {preinput('Address', 'Enter complete address with name of the City')}

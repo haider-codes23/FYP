@@ -127,7 +127,7 @@ app.post('/upload', photosMiddleware.array('photos', 100) ,(req, res) => {
 //Api endpoint for Submiting Form Data
 app.post('/places', (req, res) => {
   const {token} = req.cookies;
-  const {title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies} = req.body;
+  const {title, address, photos:addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies} = req.body;
   jsonWebToken.verify(token, jwtSecret, {}, async (error, userData) => {
     if (error) throw error;
     const placeDoc = await PlacesModel.create({
@@ -147,6 +147,36 @@ app.post('/places', (req, res) => {
 
     
   });
+});
+
+// Api for getting all the places from /places
+app.get('/places', (req, res) => {
+  const {token} = req.cookies;
+  jsonWebToken.verify(token, jwtSecret, {}, async (err, userData) => {
+    const {id} = userData;
+    res.json(await PlacesModel.find({owner:id}))
+  })
+  
+});
+
+// Api for getting places of a user with specific id
+app.get('/places/:id',async (req, res) => {
+  const {id} = req.params;
+  res.json(await PlacesModel.findById(id));
+});
+
+//Api for updating place 
+app.put('/places', async (req, res) => {
+  const {token} = req.cookies;
+  const {id, title, address, addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies} = req.body;
+  jsonWebToken.verify(token, jwtSecret, {}, async (err, userData) => {
+    const placeDoc = await PlacesModel.findById(id);
+    if (userData.id === placeDoc.owner.toString()) {
+      placeDoc.set({title, address, photos:addedPhotos, description, perks, extraInfo, checkIn, checkOut, maxRoomies});
+      await placeDoc.save();
+      res.json('ok');
+   }
+  })
 })
 
 
