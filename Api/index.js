@@ -150,7 +150,7 @@ app.post('/places', (req, res) => {
 });
 
 // Api for getting all the places from /places
-app.get('/places', (req, res) => {
+app.get('/user-places', (req, res) => {
   const {token} = req.cookies;
   jsonWebToken.verify(token, jwtSecret, {}, async (err, userData) => {
     const {id} = userData;
@@ -177,6 +177,11 @@ app.put('/places', async (req, res) => {
       res.json('ok');
    }
   })
+});
+
+// Api endpoint for listing places on indexPage
+app.get('/places',async (req, res) => {
+  res.json(await PlacesModel.find());
 })
 
 
