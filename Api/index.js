@@ -4,6 +4,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const UserModel = require('./models/users.js');
 const PlacesModel = require('./models/places.js')
+const BookingModel = require('./models/Booking.js');
 const bcrypt = require('bcryptjs');
 const jsonWebToken = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -30,6 +31,16 @@ app.use(cors({
 
 mongoose.connect(process.env.MONGO_URL);
 console.log(process.env.MONGO_URL);
+
+function getUserDataFromRequest(req) {
+  return new Promise((resolve, reject) => {
+    jsonWebToken.verify(req.cookies.token, jwtSecret, {}, async (err, userData) => {
+      if (err) throw err;
+      resolve(userData);
+    });
+
+  });
+}
 
 app.get('/test', (req, res) => {
   res.json('test ok');
@@ -183,7 +194,26 @@ app.put('/places', async (req, res) => {
 // Api endpoint for listing places on indexPage
 app.get('/places',async (req, res) => {
   res.json(await PlacesModel.find());
-})
+});
+// Api endpoint for creating a booking
+app.post('/bookings',async (req, res) => {
+  const userData = await getUserDataFromRequest(req);
+  const {place, checkIn, checkOut, numberOfRoomies, name, phone, price} = req.body;  
+  BookingModel.create({
+    place, checkIn, checkOut, numberOfRoomies, name, phone, price, user:userData.id,
+  }).then((bookingDoc) => {
+    res.json(bookingDoc);
+  }).catch((err) => {
+    throw err;
+  });
+});
+
+
+// Api endpoint for getting Bookings
+app.get('/bookings', async (req, res) => {
+  const userData = await getUserDataFromRequest(req);
+  res.json(await BookingModel.find({user:userData.id}).populate('place'));
+});
 
 
 

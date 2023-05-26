@@ -11,7 +11,7 @@ function Header() {
   return (
     <>
       <div>
-        <header className='flex justify-between flex-shrink-0'>
+        <header className='flex justify-between flex-shrink-0 pb-4'>
           
           <Link to={'/'} href="" className="flex items-center gap-1 flex-shrink-0 ">
             <img src={BedRoomIcon} className='w-12 h-12' alt="" />
